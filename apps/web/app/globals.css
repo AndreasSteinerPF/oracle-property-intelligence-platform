@@ -1,0 +1,68 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Tokens extracted from elephant.xyz production CSS — see design-system.md */
+:root {
+  --background: 215 45% 8%; /* deep navy #0e1628 */
+  --foreground: 42 40% 78%; /* warm cream #e8d8b0 */
+  --card: 215 38% 14%;
+  --card-foreground: 42 40% 78%;
+  --popover: 215 38% 14%;
+  --popover-foreground: 42 40% 78%;
+  --primary: 42 68% 56%; /* gold #d4a843 */
+  --primary-foreground: 215 45% 8%;
+  --secondary: 215 30% 20%; /* navy panel #1a2540 */
+  --secondary-foreground: 42 40% 78%;
+  --muted: 215 30% 18%;
+  --muted-foreground: 210 20% 55%; /* steel blue-gray #7a8ca5 */
+  --accent: 42 50% 70%; /* gold tint */
+  --accent-foreground: 215 45% 8%;
+  --destructive: 0 64% 55%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 215 30% 25%; /* navy border #1e2d4a */
+  --input: 215 30% 25%;
+  --ring: 42 68% 56%;
+  --radius: 0.75rem;
+  --ink-panel: 215 45% 6%; /* darker navy */
+  --eyebrow-on-paper: 42 60% 40%; /* darkened gold for AA contrast */
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-extrabold tracking-[-0.01em];
+  }
+}
+
+@layer utilities {
+  .eyebrow {
+    @apply font-display text-xs uppercase tracking-[0.18em];
+  }
+  .eyebrow-light {
+    color: hsl(var(--primary));
+  }
+  .eyebrow-dark {
+    color: hsl(var(--eyebrow-on-paper));
+  }
+  .nums {
+    @apply tabular-nums;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

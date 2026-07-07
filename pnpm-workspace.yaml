@@ -1,0 +1,11 @@
+packages:
+  - "packages/*"
+  - "apps/*"
+  - "infra"
+
+allowBuilds:
+  esbuild: true
+  sharp: true
+
+ignoredBuiltDependencies:
+  - sharp

@@ -1,0 +1,5 @@
+{
+  "installCommand": "echo \"No install required for static runtime\"",
+  "buildCommand": "mkdir -p public && cp index.html public/index.html && cp 'Property Hub.dc.html' 'public/Property Hub.dc.html' && cp oracle-data.js public/oracle-data.js && cp support.js public/support.js",
+  "outputDirectory": "public"
+}
