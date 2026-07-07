@@ -1,5 +1,6 @@
 /* Oracle Property Intelligence — deterministic fixture corpus.
-   Exposes window.ORACLE_DATA. Lee County, FL public-record style data. */
+/* Lee County Property Intelligence — deterministic fixture corpus.
+   Exposes window.ORACLE_DATA. Public-record-style data for Lee County, FL. */
 (function () {
   const SOURCES = {
     leepa:  { system: "Lee County Property Appraiser", host: "leepa.org" },
@@ -254,29 +255,29 @@
 
   // ---- Required demo inquiries (verbatim from Oracle README) ----
   const inquiries = [
-    { id: "q1", label: "Show all properties with more than one open permit", entity: "property", kind: "prop_multi_open" },
-    { id: "q2", label: "Show all properties with open roofing permits", entity: "property", kind: "prop_open_trade", arg: "Roofing" },
-    { id: "q3", label: "Show all properties with open electrical permits", entity: "property", kind: "prop_open_trade", arg: "Electrical" },
-    { id: "q4", label: "Show all properties that underwent major concrete work", entity: "property", kind: "prop_major_trade", arg: "Concrete" },
-    { id: "q5", label: "Show all properties that underwent major roof replacements", entity: "property", kind: "prop_major_trade", arg: "Roofing" },
-    { id: "q6", label: "Show all properties that underwent major electrical upgrades", entity: "property", kind: "prop_major_trade", arg: "Electrical" },
-    { id: "q7", label: "Show all properties with the highest permit activity during the last five years", entity: "property", kind: "prop_top_activity" },
-    { id: "q8", label: "Show all properties with significant renovation activity", entity: "property", kind: "prop_significant_reno" },
-    { id: "q9", label: "Show all contractors performing roofing work in Lee County", entity: "contractor", kind: "contractor_trade", arg: "Roofing" },
-    { id: "q10", label: "Show all contractors performing electrical work in Lee County", entity: "contractor", kind: "contractor_trade", arg: "Electrical" },
-    { id: "q11", label: "Show contractors with negative BBB ratings", entity: "contractor", kind: "contractor_negative_bbb" },
-    { id: "q12", label: "Show contractors with complaint histories", entity: "contractor", kind: "contractor_complaints" },
-    { id: "q13", label: "Show projects completed by contractors with negative BBB ratings or complaint histories", entity: "project", kind: "projects_risky" },
-    { id: "q14", label: "Show businesses operating across multiple properties", entity: "business", kind: "business_multi" },
-    { id: "q15", label: "Show owners associated with multiple properties", entity: "owner", kind: "owner_multi" },
-    { id: "q16", label: "Show tenants operating across multiple locations", entity: "tenant", kind: "tenant_multi" },
-    { id: "q17", label: "Show properties with both ownership changes and active permit activity", entity: "property", kind: "prop_ownerchange_active" },
-    { id: "q18", label: "Show properties with active permit activity and business turnover", entity: "property", kind: "prop_active_turnover" },
-    { id: "q19", label: "Show neighborhoods with increasing permit activity", entity: "neighborhood", kind: "neighborhood_increasing" },
-    { id: "q20", label: "Show neighborhoods with the highest concentration of major renovations", entity: "neighborhood", kind: "neighborhood_reno" },
-    { id: "q21", label: "Show the most active contractors by project count", entity: "contractor", kind: "contractor_top" },
-    { id: "q22", label: "Show the most active businesses by property footprint", entity: "business", kind: "business_top" },
-    { id: "q23", label: "Show relationships between a selected property, contractor, business, tenant, and owner", entity: "graph", kind: "relationship_graph" }
+    { id: "q1", label: "Properties with multiple active permits", entity: "property", kind: "prop_multi_open" },
+    { id: "q2", label: "Properties with active roofing permits", entity: "property", kind: "prop_open_trade", arg: "Roofing" },
+    { id: "q3", label: "Properties with active electrical permits", entity: "property", kind: "prop_open_trade", arg: "Electrical" },
+    { id: "q4", label: "Properties with major concrete projects", entity: "property", kind: "prop_major_trade", arg: "Concrete" },
+    { id: "q5", label: "Properties with major roof replacements", entity: "property", kind: "prop_major_trade", arg: "Roofing" },
+    { id: "q6", label: "Properties with major electrical upgrades", entity: "property", kind: "prop_major_trade", arg: "Electrical" },
+    { id: "q7", label: "Most active properties by permit volume (5-year window)", entity: "property", kind: "prop_top_activity" },
+    { id: "q8", label: "Properties with significant renovation activity", entity: "property", kind: "prop_significant_reno" },
+    { id: "q9", label: "Roofing contractors in Lee County", entity: "contractor", kind: "contractor_trade", arg: "Roofing" },
+    { id: "q10", label: "Electrical contractors in Lee County", entity: "contractor", kind: "contractor_trade", arg: "Electrical" },
+    { id: "q11", label: "Contractors with poor BBB ratings (D or F)", entity: "contractor", kind: "contractor_negative_bbb" },
+    { id: "q12", label: "Contractors with BBB complaints on file", entity: "contractor", kind: "contractor_complaints" },
+    { id: "q13", label: "Projects by contractors with poor ratings or complaints", entity: "project", kind: "projects_risky" },
+    { id: "q14", label: "Businesses operating at multiple sites", entity: "business", kind: "business_multi" },
+    { id: "q15", label: "Owners holding multiple parcels", entity: "owner", kind: "owner_multi" },
+    { id: "q16", label: "Tenants across multiple locations", entity: "tenant", kind: "tenant_multi" },
+    { id: "q17", label: "Properties with recent transfer + active permits", entity: "property", kind: "prop_ownerchange_active" },
+    { id: "q18", label: "Properties with active permits + tenant turnover", entity: "property", kind: "prop_active_turnover" },
+    { id: "q19", label: "Neighborhoods with rising permit activity", entity: "neighborhood", kind: "neighborhood_increasing" },
+    { id: "q20", label: "Neighborhoods with the most major renovations", entity: "neighborhood", kind: "neighborhood_reno" },
+    { id: "q21", label: "Top contractors by project count", entity: "contractor", kind: "contractor_top" },
+    { id: "q22", label: "Top businesses by location count", entity: "business", kind: "business_top" },
+    { id: "q23", label: "Property relationship map (owner, contractor, business, tenant)", entity: "graph", kind: "relationship_graph" }
   ];
 
   // turnover signals (businesses that closed/changed at a property)

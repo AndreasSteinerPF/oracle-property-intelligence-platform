@@ -39,7 +39,7 @@
   h2,
   h3,
   h4 {
-    @apply font-extrabold tracking-[-0.01em];
+    @apply font-bold tracking-[-0.02em];
   }
 }
 
@@ -55,6 +55,20 @@
   }
   .nums {
     @apply tabular-nums;
+  }
+  .bento-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+  .bento-span-2 {
+    grid-column: span 2;
+  }
+  .text-gradient-gold {
+    background: linear-gradient(135deg, #d4a843, #e8c468);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
   }
 }
 

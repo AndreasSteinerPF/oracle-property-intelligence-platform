@@ -1,18 +1,18 @@
 function StatFlap({ value, label }: { value: string; label?: string }) {
   return (
     <div>
-      <div className="flex justify-center gap-1.5" role="img" aria-label={`${value}${label ? ` ${label}` : ""}`}>
+      <div className="flex justify-center gap-2" role="img" aria-label={`${value}${label ? ` ${label}` : ""}`}>
         {value.split("").map((ch, i) => (
           <span
             key={i}
             aria-hidden
-            className="relative flex h-16 w-11 items-center justify-center rounded-md bg-white font-display text-4xl text-primary shadow-sm md:h-20 md:w-14 md:text-5xl"
+            className="flex h-16 w-16 items-center justify-center rounded-full border-2 border-primary bg-transparent font-display text-3xl text-primary md:h-20 md:w-20 md:text-4xl"
           >
             {ch}
-            <span className="absolute left-0 top-1/2 h-px w-full bg-border" />
           </span>
         ))}
       </div>
+      <div className="mx-auto mt-4 h-px w-3/4 bg-primary/30" />
       {label ? <p className="mt-4 text-center text-sm text-white/72">{label}</p> : null}
     </div>
   );

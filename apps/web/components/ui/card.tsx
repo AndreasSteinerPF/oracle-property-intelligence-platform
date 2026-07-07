@@ -1,12 +1,19 @@
 import { cn } from "@/lib/utils";
 
-function Card({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  return (
-    <div
-      className={cn("rounded-lg border border-border bg-card text-card-foreground", className)}
-      {...props}
-    />
-  );
+type CardVariant = "default" | "elevated" | "accent" | "flat";
+
+function Card({
+  className,
+  variant = "default",
+  ...props
+}: React.HTMLAttributes<HTMLDivElement> & { variant?: CardVariant }) {
+  const variants: Record<CardVariant, string> = {
+    default: "rounded-lg border border-border bg-card text-card-foreground",
+    elevated: "rounded-lg border border-border bg-card shadow-lg shadow-black/20",
+    accent: "rounded-lg border-l-4 border-l-primary border border-border bg-card text-card-foreground",
+    flat: "rounded border border-border/50 bg-card/50",
+  };
+  return <div className={cn(variants[variant], className)} {...props} />;
 }
 
 function CardHeader({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
