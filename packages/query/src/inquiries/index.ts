@@ -1,5 +1,6 @@
 import { sql, type SQL } from "drizzle-orm";
 
+import { demoRunInquiry, usesDemoData } from "../demo.js";
 import { getDb } from "../db.js";
 import { offset, propertyPredicates, whereAnd, type Filters } from "../filters.js";
 import type { Citation } from "../provenance.js";
@@ -1322,6 +1323,7 @@ export function getInquiry(key: string): Inquiry | undefined {
 }
 
 export async function runInquiry(key: string, filters: Filters): Promise<InquiryResult> {
+  if (usesDemoData()) return demoRunInquiry(key, filters);
   const inquiry = getInquiry(key);
   if (inquiry === undefined) {
     throw new Error(`Unknown inquiry: ${key}`);

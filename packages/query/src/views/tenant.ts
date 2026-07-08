@@ -1,5 +1,6 @@
 import { sql, type SQL } from "drizzle-orm";
 
+import { demoGetTenant, demoListTenants, usesDemoData } from "../demo.js";
 import { getDb } from "../db.js";
 import { offset, whereAnd, type Filters } from "../filters.js";
 
@@ -103,6 +104,7 @@ export type TenantDetail = TenantCore & {
 };
 
 export async function listTenants(f: Filters): Promise<{ rows: TenantListRow[]; total: number }> {
+  if (usesDemoData()) return demoListTenants(f);
   const db = getDb();
   const where = whereAnd(tenantPredicates(f));
   const rows = await db.execute(sql`
@@ -125,6 +127,7 @@ export async function listTenants(f: Filters): Promise<{ rows: TenantListRow[]; 
 }
 
 export async function getTenant(businessRegistrationId: string): Promise<TenantDetail | null> {
+  if (usesDemoData()) return demoGetTenant(businessRegistrationId);
   const db = getDb();
   const core = await db.execute(sql`
     select br.business_registration_id, br.entity_name, br.status, br.filing_type,

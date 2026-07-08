@@ -11,8 +11,6 @@ if (fs.existsSync(repoRootEnv)) {
 }
 
 const nextConfig: NextConfig = {
-  // Self-contained server bundle for hosted SSR deploys.
-  output: "standalone",
   // Workspace packages ship as TypeScript source; let Next transpile them.
   transpilePackages: ["@oracle/query", "@oracle/db", "@oracle/shared"],
   // Keep node-postgres out of the server bundle (native-ish, resolved at runtime).
@@ -22,7 +20,7 @@ const nextConfig: NextConfig = {
   // them into RSC vendor chunks intermittently fails to resolve in dev
   // ("Cannot find module './vendor-chunks/@smithy+core@*.js'") and bloats the
   // server bundle. Externalizing lets Node require them from node_modules at
-  // runtime; `output: standalone` traces them into the deploy bundle.
+  // runtime during local builds and Vercel packaging.
   serverExternalPackages: [
     "pg",
     "pg-native",

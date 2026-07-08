@@ -1,5 +1,6 @@
 import { sql, type SQL } from "drizzle-orm";
 
+import { demoGetContractor, demoListContractors, usesDemoData } from "../demo.js";
 import { getDb } from "../db.js";
 import { offset, whereAnd, type Filters } from "../filters.js";
 
@@ -105,6 +106,7 @@ export type ContractorDetail = ContractorCore & {
 export async function listContractors(
   f: Filters
 ): Promise<{ rows: ContractorListRow[]; total: number }> {
+  if (usesDemoData()) return demoListContractors(f);
   const db = getDb();
   const where = whereAnd(contractorPredicates(f));
   const rows = await db.execute(sql`
@@ -165,6 +167,7 @@ const EMPTY = { rows: [] as Record<string, unknown>[] };
 // BBB rating/reviews/complaints from the matched profile (nullable — permit-only
 // contractors with no BBB profile still resolve and show their projects).
 export async function getContractor(id: string): Promise<ContractorDetail | null> {
+  if (usesDemoData()) return demoGetContractor(id);
   const db = getDb();
 
   // Prefer an exact BBB-profile hit; otherwise treat the id as a company_id.

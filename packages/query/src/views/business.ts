@@ -1,5 +1,6 @@
 import { sql, type SQL } from "drizzle-orm";
 
+import { demoGetBusiness, demoListBusinesses, usesDemoData } from "../demo.js";
 import { getDb } from "../db.js";
 import { offset, whereAnd, type Filters } from "../filters.js";
 
@@ -103,6 +104,7 @@ export type BusinessDetail = BusinessCore & {
 export async function listBusinesses(
   f: Filters
 ): Promise<{ rows: BusinessListRow[]; total: number }> {
+  if (usesDemoData()) return demoListBusinesses(f);
   const db = getDb();
   const where = whereAnd(businessPredicates(f));
   const rows = await db.execute(sql`
@@ -126,6 +128,7 @@ export async function listBusinesses(
 }
 
 export async function getBusiness(id: string): Promise<BusinessDetail | null> {
+  if (usesDemoData()) return demoGetBusiness(id);
   const db = getDb();
   // The id may be a business_registration_id (from the /businesses list) or a
   // company_id (inquiry rows link a business by its company). Resolve either to the

@@ -4,7 +4,6 @@ import Link from "next/link";
 
 import { answerQuestion, type Answer } from "@oracle/query";
 import { PageHeader } from "@/components/app/page-header";
-import { Badge } from "@/components/ui/badge";
 import { CitationCard } from "@/components/app/citation-card";
 import { PendingSubmit } from "@/components/app/pending-submit";
 import { Card, CardContent } from "@/components/ui/card";
@@ -57,8 +56,7 @@ async function AnswerSection({ question }: { question: string }): Promise<React.
     <div className="mt-8 space-y-6">
       <Card>
         <CardContent className="p-6">
-          <div className="mb-2 flex items-center gap-2">
-            <Badge variant="ink">{result.mode}</Badge>
+          <div className="mb-2">
             <span className="text-xs text-muted-foreground">
               grounded in {result.citations.length} records
             </span>
@@ -98,11 +96,8 @@ function AnswerPending(): React.ReactElement {
     <div className="mt-8">
       <Card>
         <CardContent className="p-6">
-          <div className="mb-3 flex items-center gap-2">
-            <Badge variant="ink">generating</Badge>
-            <span className="text-xs text-muted-foreground">
-              retrieving records and composing a cited answer…
-            </span>
+          <div className="mb-3 text-xs text-muted-foreground">
+            retrieving records and composing a cited answer…
           </div>
           <div className="space-y-2" aria-hidden>
             <div className="h-3 w-3/4 animate-pulse rounded bg-muted" />
