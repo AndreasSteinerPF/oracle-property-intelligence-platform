@@ -1,159 +1,114 @@
 import Link from "next/link";
-import { SectionHeader } from "@/components/app/section-header";
-import { StatFlap } from "@/components/app/stat-flap";
-import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card";
 
-const DATASET = {
-  properties: "480,844",
-  sourceRecords: "511,695",
-  permits: "112,431",
-  sunbiz: "57,388",
-  bbb: "870",
-};
+import { listContractors, listProperties } from "@oracle/query";
+import { WORKSPACE_COPY } from "@oracle/shared/workbench-copy";
+import { DomainLinkGrid } from "@/components/app/domain-link-grid";
+import { QueryConsoleCard } from "@/components/app/query-console-card";
+import { WorkspacePanel } from "@/components/app/workspace-panel";
+import { WorkspaceStatStrip } from "@/components/app/workspace-stat-strip";
+import { Badge } from "@/components/ui/badge";
+import { num, text } from "@/lib/format";
 
-const views = [
-  {
-    href: "/properties",
-    title: "Parcels",
-    description: "Ownership records, permits, tenants, and renovation history for every parcel.",
-    stat: `${DATASET.properties} records`,
-    span: true,
-  },
-  {
-    href: "/tenants",
-    title: "Tenants",
-    description: "Occupancy derived from business registrations, tracked over time.",
-    stat: `${DATASET.sunbiz} matches`,
-    span: false,
-  },
-  {
-    href: "/businesses",
-    title: "Businesses",
-    description: "State registrations, officers, locations, and linked permits.",
-    stat: `${DATASET.sunbiz} registrations`,
-    span: false,
-  },
-  {
-    href: "/contractors",
-    title: "Contractors",
-    description: "Permit history cross-referenced with BBB ratings, complaints, and reviews.",
-    stat: `${DATASET.bbb} BBB profiles`,
-    span: false,
-  },
-];
+export const dynamic = "force-dynamic";
 
-const steps = [
-  {
-    n: "1",
-    title: "County records ingested",
-    detail: `${DATASET.permits} permits, ${DATASET.sunbiz} registrations, ${DATASET.bbb} profiles`,
-  },
-  {
-    n: "2",
-    title: "Reconciled into one graph",
-    detail: `${DATASET.properties} canonical parcels from ${DATASET.sourceRecords} source records`,
-  },
-  {
-    n: "3",
-    title: "Cited answers out",
-    detail: "Every claim links to its source",
-  },
-];
+export default async function HomePage(): Promise<React.ReactElement> {
+  const [{ rows: properties }, { rows: contractors }] = await Promise.all([
+    listProperties({ page: 1, pageSize: 5 }),
+    listContractors({ page: 1, pageSize: 5 }),
+  ]);
 
-export default function HomePage() {
   return (
-    <>
-      {/* Hero — left-aligned split */}
-      <section className="bg-ink px-6 py-20 text-white">
-        <div className="mx-auto flex max-w-[1200px] flex-col items-center gap-12 md:flex-row md:items-start">
-          <div className="w-full md:w-3/5">
-            <p className="eyebrow eyebrow-light text-left">Lee County, Florida</p>
-            <h1 className="mt-6 max-w-2xl text-left text-4xl leading-tight md:text-5xl">
-              Every property record. Every permit. <span className="text-gradient-gold">Every source — cited.</span>
-            </h1>
-            <p className="mt-4 max-w-lg text-left text-sm text-white/72">
-              Browse parcels, permits, businesses, and contractors — or ask a question in plain
-              English and get answers backed by county records.
+    <div className="mx-auto max-w-[1440px] space-y-6 px-6 py-6">
+      <header className="space-y-3">
+        <div className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+          Workspace
+        </div>
+        <div className="flex flex-col gap-3 xl:flex-row xl:items-end xl:justify-between">
+          <div>
+            <h1 className="text-3xl font-semibold tracking-normal">{WORKSPACE_COPY.title}</h1>
+            <p className="mt-2 max-w-3xl text-sm leading-relaxed text-muted-foreground">
+              Investigate parcels, business occupancy, contractor activity, and source-backed
+              inquiry results from one operational surface.
             </p>
-            <div className="mt-8 flex items-center gap-4">
-              <Link
-                href="/properties"
-                className="inline-flex h-11 items-center gap-2 rounded-full bg-primary px-7 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
-              >
-                Start exploring <span aria-hidden>&rarr;</span>
-              </Link>
-              <Link
-                href="/ask"
-                className="text-sm text-primary underline-offset-4 hover:underline"
-              >
-                or ask a question
-              </Link>
-            </div>
           </div>
-          <div className="w-full md:w-2/5">
-            <StatFlap
-              value={DATASET.properties}
-              label={`canonical parcels with full source provenance — reconciled from ${DATASET.sourceRecords} source records.`}
-            />
+          <div className="rounded-md border border-border/70 bg-card/70 px-4 py-3 text-sm text-muted-foreground">
+            Hosted demo mode with expanded sample corpus and grounded inquiry responses.
           </div>
         </div>
-      </section>
+      </header>
 
-      {/* Four entry points — bento grid */}
-      <section className="px-6 py-16">
-        <div className="mx-auto max-w-[1200px]">
-          <SectionHeader
-            eyebrow="Four entry points"
-            title="What you can look up"
-            description="Each view pulls from real county records, with source links on every claim."
-          />
-          <div className="bento-grid mt-10">
-            {views.map((v) => (
-              <Link key={v.href} href={v.href} className={`group ${v.span ? "bento-span-2" : ""}`}>
-                <Card variant="accent" className="h-full transition-shadow group-hover:shadow-sm">
-                  <CardContent className="p-6">
-                    <p className="nums font-display text-sm text-muted-foreground">{v.stat}</p>
-                    <CardTitle className="mt-2">{v.title}</CardTitle>
-                    <CardDescription className="mt-2">{v.description}</CardDescription>
-                    <p className="mt-4 text-sm font-semibold">
-                      View <span aria-hidden>&rarr;</span>
-                    </p>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
+      <WorkspaceStatStrip />
 
-      {/* Pipeline — 3-step process */}
-      <section className="bg-secondary px-6 py-16">
-        <div className="mx-auto max-w-[1200px]">
-          <SectionHeader
-            eyebrow="The pipeline"
-            title="From county records to cited answers"
-            dark
-          />
-          <div className="mt-10 flex flex-col gap-8 md:flex-row md:items-start md:gap-0">
-            {steps.map((s, i) => (
-              <div key={s.n} className="flex items-start gap-4 md:flex-1 md:flex-col md:gap-0">
-                <div className="flex items-center gap-3 md:flex-col md:items-start">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-primary font-display text-lg text-primary">
-                    {s.n}
-                  </span>
-                  <div className="md:mt-4">
-                    <h3 className="text-base font-bold text-white">{s.title}</h3>
-                    <p className="mt-1 text-sm text-white/72">{s.detail}</p>
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_minmax(360px,0.95fr)]">
+        <div className="space-y-6">
+          <QueryConsoleCard />
+          <WorkspacePanel title="Property watchlist">
+            <div className="space-y-3">
+              {properties.map((property) => (
+                <Link
+                  key={property.property_id}
+                  href={`/properties/${property.property_id}`}
+                  className="flex items-start justify-between gap-4 rounded-md border border-border/60 bg-background/40 px-4 py-3 transition-colors hover:border-primary/50 hover:bg-secondary/40"
+                >
+                  <div className="min-w-0">
+                    <div className="text-sm font-medium text-foreground">
+                      {text(property.address)}
+                      {property.city ? `, ${text(property.city)}` : ""}
+                    </div>
+                    <div className="mt-1 text-xs text-muted-foreground">
+                      Parcel {text(property.parcel_identifier)} · {text(property.property_type)}
+                    </div>
+                    <div className="mt-2 text-xs text-muted-foreground">
+                      Owner {text(property.owner)}
+                    </div>
                   </div>
-                </div>
-                {i < steps.length - 1 && (
-                  <div className="hidden h-px flex-1 bg-primary/30 md:mt-5 md:ml-4 md:block" />
-                )}
-              </div>
-            ))}
-          </div>
+                  <div className="shrink-0 text-right text-xs text-muted-foreground">
+                    <div>{num(property.permit_count)} permits</div>
+                    {property.open_permits > 0 ? (
+                      <Badge className="mt-2" variant="risk">
+                        {num(property.open_permits)} open
+                      </Badge>
+                    ) : null}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </WorkspacePanel>
         </div>
-      </section>
-    </>
+
+        <div className="space-y-6">
+          <WorkspacePanel title="Contractor risk">
+            <div className="space-y-3">
+              {contractors.map((contractor) => (
+                <Link
+                  key={contractor.business_reputation_profile_id}
+                  href={`/contractors/${contractor.business_reputation_profile_id}`}
+                  className="flex items-start justify-between gap-4 rounded-md border border-border/60 bg-background/40 px-4 py-3 transition-colors hover:border-primary/50 hover:bg-secondary/40"
+                >
+                  <div className="min-w-0">
+                    <div className="text-sm font-medium text-foreground">{text(contractor.name)}</div>
+                    <div className="mt-1 text-xs text-muted-foreground">
+                      {text(contractor.score_band)} · {num(contractor.project_count)} linked projects
+                    </div>
+                  </div>
+                  <div className="shrink-0 text-right text-xs text-muted-foreground">
+                    {contractor.bbb_rating ? (
+                      <Badge variant="score">{text(contractor.bbb_rating)}</Badge>
+                    ) : (
+                      "No rating"
+                    )}
+                    <div className="mt-2">{num(contractor.complaint_count ?? 0)} complaints</div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </WorkspacePanel>
+
+          <WorkspacePanel title="Domain pivots">
+            <DomainLinkGrid />
+          </WorkspacePanel>
+        </div>
+      </div>
+    </div>
   );
 }

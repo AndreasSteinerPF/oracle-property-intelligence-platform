@@ -4,13 +4,12 @@ import Link from "next/link";
 
 import { answerQuestion, type Answer } from "@oracle/query";
 import { PageHeader } from "@/components/app/page-header";
-import { Badge } from "@/components/ui/badge";
 import { CitationCard } from "@/components/app/citation-card";
 import { PendingSubmit } from "@/components/app/pending-submit";
 import { Card, CardContent } from "@/components/ui/card";
 import { sourceHref } from "@/lib/format";
 
-export const metadata: Metadata = { title: "Ask" };
+export const metadata: Metadata = { title: "Inquiries" };
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
@@ -57,8 +56,7 @@ async function AnswerSection({ question }: { question: string }): Promise<React.
     <div className="mt-8 space-y-6">
       <Card>
         <CardContent className="p-6">
-          <div className="mb-2 flex items-center gap-2">
-            <Badge variant="ink">{result.mode}</Badge>
+          <div className="mb-2">
             <span className="text-xs text-muted-foreground">
               grounded in {result.citations.length} records
             </span>
@@ -98,11 +96,8 @@ function AnswerPending(): React.ReactElement {
     <div className="mt-8">
       <Card>
         <CardContent className="p-6">
-          <div className="mb-3 flex items-center gap-2">
-            <Badge variant="ink">generating</Badge>
-            <span className="text-xs text-muted-foreground">
-              retrieving records and composing a cited answer…
-            </span>
+          <div className="mb-3 text-xs text-muted-foreground">
+            retrieving records and composing a cited answer…
           </div>
           <div className="space-y-2" aria-hidden>
             <div className="h-3 w-3/4 animate-pulse rounded bg-muted" />
@@ -124,49 +119,80 @@ export default async function AskPage({
   const question = q?.trim();
 
   return (
-    <div className="mx-auto max-w-[840px] px-6 pb-16">
+    <div className="mx-auto max-w-[1120px] px-6 py-6">
       <PageHeader
-        eyebrow="Natural language"
-        title="Ask the county"
-        description="Answers are generated only from retrieved records and always cite their sources."
+        eyebrow="Inquiry console"
+        title="Inquiries"
+        description="Run natural-language questions against retrieved records and inspect grounded evidence with citations."
       />
-      <form className="flex flex-col gap-3" method="get">
-        <textarea
-          name="q"
-          rows={3}
-          defaultValue={question ?? ""}
-          placeholder="e.g. Show properties with open roofing permits in Cape Coral"
-          className="w-full rounded-lg border border-input bg-card px-4 py-3 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        />
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex flex-wrap gap-2">
-            {EXAMPLES.map((e) => (
-              <Link
-                key={e}
-                href={`/ask?q=${encodeURIComponent(e)}`}
-                prefetch={false}
-                className="rounded-full border border-border px-3 py-1 text-xs text-muted-foreground transition-colors hover:bg-secondary"
-              >
-                {e}
-              </Link>
-            ))}
-          </div>
-          <PendingSubmit type="submit" arrow pendingLabel="Searching">
-            Ask
-          </PendingSubmit>
-        </div>
-      </form>
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+        <section className="space-y-4">
+          <form className="rounded-md border border-border/80 bg-card/90 p-5" method="get">
+            <textarea
+              name="q"
+              rows={3}
+              defaultValue={question ?? ""}
+              placeholder="e.g. Show properties with open roofing permits in Cape Coral"
+              className="w-full rounded-md border border-input bg-background px-4 py-3 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            />
+            <div className="mt-4 flex items-center justify-between gap-3">
+              <div className="flex flex-wrap gap-2">
+                {EXAMPLES.map((e) => (
+                  <Link
+                    key={e}
+                    href={`/ask?q=${encodeURIComponent(e)}`}
+                    prefetch={false}
+                    className="rounded-full border border-border px-3 py-1 text-xs text-muted-foreground transition-colors hover:bg-secondary"
+                  >
+                    {e}
+                  </Link>
+                ))}
+              </div>
+              <PendingSubmit type="submit" arrow pendingLabel="Searching">
+                Run inquiry
+              </PendingSubmit>
+            </div>
+          </form>
 
-      {question ? (
-        <Suspense key={question} fallback={<AnswerPending />}>
-          <AnswerSection question={question} />
-        </Suspense>
-      ) : (
-        <p className="mt-8 text-sm text-muted-foreground">
-          Ask a question about Lee County properties, permits, contractors, or businesses. Every
-          answer is retrieved from the loaded records and cites its sources.
-        </p>
-      )}
+          {question ? (
+            <Suspense key={question} fallback={<AnswerPending />}>
+              <AnswerSection question={question} />
+            </Suspense>
+          ) : (
+            <p className="rounded-md border border-dashed border-border/70 bg-card/40 px-4 py-5 text-sm text-muted-foreground">
+              Start with a property, permit, contractor, or business question. The inquiry path
+              only responds from retrieved records and lists supporting citations for every answer.
+            </p>
+          )}
+        </section>
+
+        <aside className="space-y-4">
+          <Card className="rounded-md border-border/80 bg-card/90">
+            <CardContent className="p-5">
+              <div className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+                Workflow
+              </div>
+              <ol className="mt-3 space-y-3 text-sm text-muted-foreground">
+                <li>1. Run a natural-language inquiry.</li>
+                <li>2. Review the grounded answer.</li>
+                <li>3. Pivot into cited records for detail.</li>
+              </ol>
+            </CardContent>
+          </Card>
+
+          <Card className="rounded-md border-border/80 bg-card/90">
+            <CardContent className="p-5">
+              <div className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+                Coverage
+              </div>
+              <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+                Best suited for the demo inquiry set around open permits, renovation activity,
+                business footprint, and contractor reputation.
+              </p>
+            </CardContent>
+          </Card>
+        </aside>
+      </div>
     </div>
   );
 }

@@ -106,11 +106,25 @@
               <div onClick="{{ s.onClick }}" style="{{ s.style }}">{{ s.label }}</div>
             </sc-for>
             <div style="flex:1"></div>
-            <div onClick="document.getElementById('inqPanel').style.display = document.getElementById('inqPanel').style.display === 'none' ? 'block' : 'none'" style="font-size:11px;font-weight:600;padding:5px 11px;border-radius:7px;cursor:pointer;background:#16223d;color:#9aacc5;border:1px solid #223258;font-family:'JetBrains Mono',monospace;">23 preset inquiries ▾</div>
+            <div onClick="{{ toggleInquiryPanel }}" style="font-size:11px;font-weight:600;padding:5px 11px;border-radius:7px;cursor:pointer;background:#16223d;color:#9aacc5;border:1px solid #223258;font-family:'JetBrains Mono',monospace;">{{ inquiryPanelLabel }}</div>
+          </div>
+
+          <div style="flex:0 0 auto;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:10px 16px;border-bottom:1px solid #1a2540;background:rgba(19,30,54,0.6);">
+            <div style="max-width:360px;font-size:11.5px;color:#7a8ca5;line-height:1.5;">
+              Start with a preset county inquiry or run your own parcel, permit, contractor, or business search.
+            </div>
+            <div style="{{ banner.inlineStyle }}">
+              <span style="{{ banner.dotStyle }}"></span>
+              <div style="min-width:0;">
+                <div style="font-size:12px;line-height:1.4;color:#e8d8b0;">{{ banner.text }}</div>
+                <div style="margin-top:4px;font-family:'JetBrains Mono',monospace;font-size:10px;color:#6a7d9a;">{{ banner.note }}</div>
+              </div>
+            </div>
           </div>
 
           <!-- inquiry library panel (collapsible) -->
-          <div id="inqPanel" style="display:none;flex:0 0 auto;padding:12px 16px;border-bottom:1px solid #1a2540;background:#131e36;">
+          <sc-if value="{{ inquiryPanelOpen }}" hint-placeholder-val="{{ false }}">
+          <div style="flex:0 0 auto;padding:12px 16px;border-bottom:1px solid #1a2540;background:#131e36;">
             <sc-for list="{{ inquiryGroups }}" as="g" hint-placeholder-count="5">
               <div style="margin-bottom:10px;">
                 <div style="font-size:10px;letter-spacing:.13em;color:#5a6d8a;font-weight:600;font-family:'JetBrains Mono',monospace;margin-bottom:6px;">{{ g.title }}</div>
@@ -125,13 +139,7 @@
               </div>
             </sc-for>
           </div>
-
-          <!-- floating notification banner -->
-          <div style="position:absolute;top:12px;right:16px;max-width:320px;z-index:3;{{ banner.floatStyle }}">
-            <span style="{{ banner.dotStyle }}"></span>
-            <span style="font-size:12px;line-height:1.4;">{{ banner.text }}</span>
-            <div style="margin-top:4px;font-family:'JetBrains Mono',monospace;font-size:10px;color:#6a7d9a;">{{ banner.note }}</div>
-          </div>
+          </sc-if>
 
           <div style="flex:1;display:flex;min-height:0;">
 
@@ -524,7 +532,7 @@
           </sc-if>
           <div style="padding:14px 16px;">
             <sc-for list="{{ evRuns }}" as="r" hint-placeholder-count="3">
-              <div onClick="{{ r.onClick }}" style="display:flex;gap:10px;cursor:pointer;">
+              <div onClick="{{ r.onClick }}" style="{{ r.rowStyle }}">
                 <div style="display:flex;flex-direction:column;align-items:center;flex:0 0 auto;">
                   <span style="width:10px;height:10px;border-radius:50%;background:#d4a843;margin-top:4px;"></span>
                   <span style="width:2px;flex:1;background:#2a3a5e;margin-top:2px;"></span>
@@ -603,6 +611,7 @@ class Component extends DCLogic {
     mode: 'intelligence', scope: 'all', query: '',
     activeInquiry: null, res: null, selType: null, selId: null,
     graphProp: 'p10',
+    inquiryPanelOpen: false,
     statuses: null, certDates: {}, reviewer: 'michael.gill',
     regSel: 'oracle', draftVersion: '1.0.0', draftNotes: '',
     evRuns: null, evSel: null, tick: 0
@@ -620,8 +629,36 @@ class Component extends DCLogic {
       this.D.agents.forEach(a => { statuses[a.id] = a.id === 'oracle' ? 'Discovered' : a.status; });
       const certDates = {};
       this.D.agents.forEach(a => { if (a.certifiedDate) certDates[a.id] = a.certifiedDate; });
-      const seedRuns = [];
-      this.setState({ statuses, certDates, evRuns: seedRuns, tick: 1 });
+      const defaultInquiry = this.D.inquiries.find(i => i.id === 'q1') || this.D.inquiries[0] || null;
+      if (!defaultInquiry) {
+        this.setState({ statuses, certDates, evRuns: [], tick: 1 });
+        return;
+      }
+      const res = this.computeRes(defaultInquiry);
+      let selType = null;
+      let selId = null;
+      if (res.isGraph) {
+        selType = 'property';
+        selId = this.state.graphProp;
+      } else if (res.cards.length) {
+        const first = res.cards.find(c => c.type !== 'neighborhood') || res.cards[0];
+        if (first) {
+          selType = first.type === 'project' ? 'property' : first.type;
+          selId = first.type === 'project' ? this.cardKeyProp(first) : first.key;
+        }
+      }
+      const seedRun = this.makeEvidenceRun(defaultInquiry.label, res);
+      this.setState({
+        statuses,
+        certDates,
+        activeInquiry: defaultInquiry.id,
+        res,
+        selType,
+        selId,
+        evRuns: [seedRun],
+        evSel: seedRun.id,
+        tick: 1
+      });
     } else {
       this.setState(s => ({ tick: s.tick + 1 }));
     }
@@ -911,22 +948,32 @@ class Component extends DCLogic {
   onGraphSelect(e) { const id = e.target.value; const res = this.computeRes(this.D.inquiries.find(i => i.kind === 'relationship_graph')); this.setState({ graphProp: id, selType: 'property', selId: id, res }); }
   onNotes(e) { this.setState({ draftNotes: e.target.value }); }
   onVersion(e) { this.setState({ draftVersion: e.target.value }); }
+  toggleInquiryPanel() { this.setState(s => ({ inquiryPanelOpen: !s.inquiryPanelOpen })); }
   select(type, id) { this.setState({ selType: type, selId: id }); }
   setMode(m) { this.setState({ mode: m }); }
   setScope(s) {
     this.setState({ scope: s });
   }
 
-  pushEvidence(query, res) {
+  makeEvidenceRun(query, res) {
     const cert = this.getStatus('oracle');
     const now = new Date();
     const ts = '2026-06-18 ' + String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
     const sources = [...new Set((res.citations || []).map(c => c.system))];
-    const run = {
-      id: 'r' + Date.now(), query, ts, cert,
-      count: res.count, summary: res.note || res.headerLabel,
-      sources, citations: res.citations || []
+    return {
+      id: 'r' + Date.now(),
+      query,
+      ts,
+      cert,
+      count: res.count,
+      summary: res.note || res.headerLabel,
+      sources,
+      citations: res.citations || []
     };
+  }
+
+  pushEvidence(query, res) {
+    const run = this.makeEvidenceRun(query, res);
     this.setState(s => ({ evRuns: [run, ...(s.evRuns || [])], evSel: run.id }));
   }
 
@@ -1085,9 +1132,9 @@ class Component extends DCLogic {
     // intelligence banner
     let banner;
     if (oStatus === 'Certified') {
-      banner = { floatStyle: 'padding:10px 14px;border-radius:8px;background:rgba(95,208,138,0.08);border:1px solid rgba(95,208,138,0.22);display:flex;align-items:flex-start;gap:8px;', dotStyle: 'width:8px;height:8px;border-radius:50%;background:#5fd08a;box-shadow:0 0 8px #5fd08a;flex:0 0 auto;margin-top:3px;', text: 'Agent v' + (st.draftVersion || '1.0.0') + ' is certified — all results carry source citations and full lineage.', note: 'since ' + (st.certDates['oracle'] || '2026-06-18') };
+      banner = { inlineStyle: 'max-width:360px;padding:10px 14px;border-radius:8px;background:rgba(95,208,138,0.08);border:1px solid rgba(95,208,138,0.22);display:flex;align-items:flex-start;gap:8px;flex:0 1 auto;', dotStyle: 'width:8px;height:8px;border-radius:50%;background:#5fd08a;box-shadow:0 0 8px #5fd08a;flex:0 0 auto;margin-top:3px;', text: 'Agent v' + (st.draftVersion || '1.0.0') + ' is certified — all results carry source citations and full lineage.', note: 'since ' + (st.certDates['oracle'] || '2026-06-18') };
     } else {
-      banner = { floatStyle: 'padding:10px 14px;border-radius:8px;background:rgba(232,183,90,0.08);border:1px solid rgba(232,183,90,0.22);display:flex;align-items:flex-start;gap:8px;', dotStyle: 'width:8px;height:8px;border-radius:50%;background:#e8b75a;box-shadow:0 0 8px #e8b75a;flex:0 0 auto;margin-top:3px;', text: 'Agent status: ' + oStatus + '. Results are marked provisional until you complete certification in the Agents tab.', note: 'certification pending' };
+      banner = { inlineStyle: 'max-width:360px;padding:10px 14px;border-radius:8px;background:rgba(232,183,90,0.08);border:1px solid rgba(232,183,90,0.22);display:flex;align-items:flex-start;gap:8px;flex:0 1 auto;', dotStyle: 'width:8px;height:8px;border-radius:50%;background:#e8b75a;box-shadow:0 0 8px #e8b75a;flex:0 0 auto;margin-top:3px;', text: 'Agent status: ' + oStatus + '. Results are marked provisional until you complete certification in the Agents tab.', note: 'certification pending' };
     }
 
     const scopes = [['all', 'All'], ['property', 'Property'], ['contractor', 'Contractor'], ['business', 'Business'], ['tenant', 'Tenant']];
@@ -1202,6 +1249,9 @@ class Component extends DCLogic {
       modeTabs, corpusChips, corpus: c, oracle,
       banner, scope: st.scope, scopeTabs, query: st.query,
       onQueryInput: (e) => this.onQueryInput(e), onQueryKey: (e) => this.onQueryKey(e), runFreeText: () => this.runFreeText(),
+      inquiryPanelOpen: !!st.inquiryPanelOpen,
+      inquiryPanelLabel: (st.inquiryPanelOpen ? 'Hide' : 'Show') + ' preset inquiries ▾',
+      toggleInquiryPanel: () => this.toggleInquiryPanel(),
       inquiryGroups,
       res: { active: !!st.res, empty: !st.res, isGraph: !!(st.res && st.res.isGraph), hasAnswer: !!(st.res && st.res.hasAnswer), count: st.res ? st.res.count : 0, headerLabel: st.res ? st.res.headerLabel : '', note: st.res ? st.res.note : '', answer: st.res ? st.res.answer : '', cards: st.res ? (st.res.cards || []) : [] },
       hasDetail, noDetail: !hasDetail, detail,
@@ -1218,28 +1268,3 @@ class Component extends DCLogic {
 </script>
 </body>
 </html>
-      metas: [{ k: 'Parcel ID', v: p.parcel }, { k: 'Owner of record', v: this.owner(p.owner).name }, { k: 'Permit count', v: String(p.permits.length) }],
-    if (c.complaints.length) badges.push(Object.assign({ label: c.complaints.length + ' complaints filed' }, this.T('red')));
-      metas: [{ k: 'License #', v: c.license }, { k: 'Rating', v: c.review + ' / 5' }, { k: 'County', v: c.county }],
-    if (b.locations.length > 1) badges.push(Object.assign({ label: b.locations.length + ' sites' }, this.T('accent')));
-      metas: [{ k: 'Sunbiz #', v: b.sunbiz }, { k: 'Owner', v: b.owner }, { k: 'Locations', v: String(b.locations.length) }],
-      metas: [{ k: 'Permit count', v: String(n.permits) }, { k: 'Major project', v: String(n.major) }, { k: 'Recent', v: n.recent + ' / 60d' }],
-      R.note = 'Two or more active permits on a single parcel — flags potential redevelopment or compliance risk.';
-      R.note = 'Parcels with an active ' + arg.toLowerCase() + ' permit on file.';
-      R.note = 'Classified major ' + arg.toLowerCase() + ' projects, based on permit scope and declared value.';
-      R.note = 'Most active parcels by total permit volume across a five-year lookback.';
-      R.note = 'Parcels with classified major renovation work — roofing, electrical, concrete, structural, plumbing, HVAC.';
-      R.note = 'Recent ownership transfer alongside active permitting — signals acquisition or value-add activity.';
-      R.note = 'Active permits coinciding with a tenant change at the same location.';
-      R.note = arg + ' contractors active in Lee County.';
-      R.note = 'Contractors with a D or F BBB rating.';
-      R.note = 'Contractors with one or more BBB complaints on file.';
-      R.note = 'Top contractors by completed project count.';
-      R.note = 'Projects by contractors with poor BBB ratings or complaint histories.';
-      R.note = 'Businesses registered at more than one property.';
-      R.note = 'Businesses ranked by number of locations.';
-      R.note = 'Owners holding two or more parcels.';
-      R.note = 'Tenants active at more than one site.';
-      R.note = 'Neighborhoods with rising permit activity in the past 60 days.';
-      R.note = 'Neighborhoods with the highest count of major renovation projects.';
-      R.isGraph = true; R.note = 'Connected owner, contractors, businesses, and tenants for the selected parcel.';

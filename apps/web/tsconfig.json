@@ -14,7 +14,13 @@
     "jsx": "preserve",
     "incremental": true,
     "plugins": [{ "name": "next" }],
-    "paths": { "@/*": ["./*"] }
+    "paths": {
+      "@/*": ["./*"],
+      "@oracle/shared": ["../../packages/shared/src/index.ts"],
+      "@oracle/shared/*": ["../../packages/shared/src/*"],
+      "@oracle/query": ["../../packages/query/src/index.ts"],
+      "@oracle/query/*": ["../../packages/query/src/*"]
+    }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
   "exclude": ["node_modules"]

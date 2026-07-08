@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 
+import { demoGetProperty, demoListProperties, usesDemoData } from "../demo.js";
 import { getDb } from "../db.js";
 import { offset, propertyPredicates, whereAnd, type Filters } from "../filters.js";
 
@@ -115,6 +116,7 @@ export type PropertyDetail = PropertyCore & {
 export async function listProperties(
   f: Filters
 ): Promise<{ rows: PropertyListRow[]; total: number }> {
+  if (usesDemoData()) return demoListProperties(f);
   const db = getDb();
   const where = whereAnd(propertyPredicates(f));
   const rows = await db.execute(sql`
@@ -143,6 +145,7 @@ export async function listProperties(
 }
 
 export async function getProperty(propertyId: string): Promise<PropertyDetail | null> {
+  if (usesDemoData()) return demoGetProperty(propertyId);
   const db = getDb();
   const core = await db.execute(sql`
     select p.property_id, p.parcel_identifier, p.property_type, p.property_usage_type,

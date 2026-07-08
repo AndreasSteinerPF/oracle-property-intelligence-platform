@@ -3,6 +3,7 @@ import { bedrockCredentialProvider, bedrockRegion, loadEnv } from "@oracle/share
 import { generateText } from "ai";
 import { sql } from "drizzle-orm";
 
+import { demoAnswerQuestion, usesDemoData } from "../demo.js";
 import { getDb } from "../db.js";
 import type { Filters } from "../filters.js";
 import { INQUIRIES, runInquiry, type InquiryRow } from "../inquiries/index.js";
@@ -395,6 +396,7 @@ function renderRetrievalOnlyAnswer(
  * "no supporting records" answer rather than inventing one.
  */
 export async function answerQuestion(question: string): Promise<Answer> {
+  if (usesDemoData()) return demoAnswerQuestion(question);
   const route = routeCanonicalQuestion(question);
   if (route) return answerViaInquiry(route);
 

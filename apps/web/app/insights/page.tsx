@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/table";
 import { sourceHref, text } from "@/lib/format";
 
-export const metadata: Metadata = { title: "Insights" };
+export const metadata: Metadata = { title: "Workspace Inquiries" };
 export const dynamic = "force-dynamic";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
@@ -155,9 +155,9 @@ export default async function InsightsPage({
   return (
     <div className="mx-auto max-w-[1280px] px-6 pb-16">
       <PageHeader
-        eyebrow="Required inquiries"
-        title="Insights"
-        description="The canonical inquiry set runs over real records and returns citations for every row."
+        eyebrow="Inquiry library"
+        title="Required inquiries"
+        description="Run the canonical inquiry set, review the result table, and pivot into grounded records."
       />
 
       <div className="grid gap-8 lg:grid-cols-[420px_minmax(0,1fr)]">

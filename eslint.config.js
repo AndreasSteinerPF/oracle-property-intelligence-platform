@@ -14,6 +14,8 @@ export default tseslint.config(
       "apps/web/**",
       // Local-only tooling directories, not part of the TS project.
       ".claude/**",
+      ".codex-pr-export/**",
+      ".worktrees/**",
       "**/*.mjs",
       "oracle-data.js",
       "support.js",

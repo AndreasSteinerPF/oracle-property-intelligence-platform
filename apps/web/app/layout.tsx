@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import { SiteNav } from "@/components/app/site-nav";
-import { SiteFooter } from "@/components/app/site-footer";
+import { WorkbenchShell } from "@/components/app/workbench-shell";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -24,10 +23,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         } as React.CSSProperties
       }
     >
-      <body className="font-sans flex min-h-screen flex-col">
-        <SiteNav />
-        <main className="flex-1">{children}</main>
-        <SiteFooter />
+      <body className="min-h-screen font-sans">
+        <WorkbenchShell>{children}</WorkbenchShell>
       </body>
     </html>
   );
