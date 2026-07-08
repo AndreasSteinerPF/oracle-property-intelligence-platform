@@ -44,6 +44,9 @@ importers:
       '@oracle/query':
         specifier: workspace:*
         version: link:../../packages/query
+      '@oracle/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
