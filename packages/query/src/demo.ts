@@ -374,7 +374,7 @@ function sortByNumberDesc<TRow extends InquiryRow>(rows: TRow[], key: keyof TRow
   return [...rows].sort((a, b) => Number(b[key] ?? 0) - Number(a[key] ?? 0));
 }
 
-export async function demoListProperties(filters: Filters) {
+export function demoListProperties(filters: Filters) {
   const rows = loadDemoData()
     .properties
     .filter((property) => matchesText(property.city, filters.municipality))
@@ -398,12 +398,12 @@ export async function demoListProperties(filters: Filters) {
     }))
     .sort((a, b) => a.parcel_identifier.localeCompare(b.parcel_identifier));
 
-  return paginate(rows, filters);
+  return Promise.resolve(paginate(rows, filters));
 }
 
-export async function demoGetProperty(id: string) {
+export function demoGetProperty(id: string) {
   const property = propertyById(id);
-  if (!property) return null;
+  if (!property) return Promise.resolve(null);
   const owner = ownerById(property.owner);
   const permits = property.permits.map((permit) => ({
     property_improvement_id: permit.id,
@@ -419,7 +419,7 @@ export async function demoGetProperty(id: string) {
     renovation_categories: permit.major ? categoriesForPermit(permit) : [],
   }));
 
-  return {
+  return Promise.resolve({
     property_id: property.id,
     parcel_identifier: property.parcel,
     property_type: property.class,
@@ -483,10 +483,10 @@ export async function demoGetProperty(id: string) {
         profile_url: firstSourceUrl(contractor.src),
         score_band: contractorScoreBand(contractor),
       })),
-  };
+  });
 }
 
-export async function demoListTenants(filters: Filters) {
+export function demoListTenants(filters: Filters) {
   const rows = loadDemoData()
     .tenants
     .filter((tenant) => matchesText(tenant.name, filters.q))
@@ -506,18 +506,18 @@ export async function demoListTenants(filters: Filters) {
     }))
     .sort((a, b) => (a.entity_name ?? "").localeCompare(b.entity_name ?? ""));
 
-  return paginate(rows, filters);
+  return Promise.resolve(paginate(rows, filters));
 }
 
-export async function demoGetTenant(id: string) {
+export function demoGetTenant(id: string) {
   const tenant = tenantById(id);
-  if (!tenant) return null;
+  if (!tenant) return Promise.resolve(null);
   const business = businessById(tenant.businesses[0] ?? "");
   const relatedProperties = tenant.locations
     .map((propertyId) => propertyById(propertyId))
     .filter((property): property is DemoProperty => property !== undefined);
 
-  return {
+  return Promise.resolve({
     business_registration_id: tenant.id,
     entity_name: tenant.name,
     status: business?.status ?? "Active",
@@ -571,10 +571,10 @@ export async function demoGetTenant(id: string) {
         parcel_identifier: property.parcel,
       }))
     ),
-  };
+  });
 }
 
-export async function demoListBusinesses(filters: Filters) {
+export function demoListBusinesses(filters: Filters) {
   const rows = loadDemoData()
     .businesses
     .filter((business) => matchesText(business.name, filters.q))
@@ -596,17 +596,17 @@ export async function demoListBusinesses(filters: Filters) {
     }))
     .sort((a, b) => (a.entity_name ?? "").localeCompare(b.entity_name ?? ""));
 
-  return paginate(rows, filters);
+  return Promise.resolve(paginate(rows, filters));
 }
 
-export async function demoGetBusiness(id: string) {
+export function demoGetBusiness(id: string) {
   const business = businessById(id);
-  if (!business) return null;
+  if (!business) return Promise.resolve(null);
   const relatedProperties = business.locations
     .map((propertyId) => propertyById(propertyId))
     .filter((property): property is DemoProperty => property !== undefined);
 
-  return {
+  return Promise.resolve({
     business_registration_id: business.id,
     entity_name: business.name,
     document_number: business.sunbiz,
@@ -659,10 +659,10 @@ export async function demoGetBusiness(id: string) {
         parcel_identifier: property.parcel,
       }))
     ),
-  };
+  });
 }
 
-export async function demoListContractors(filters: Filters) {
+export function demoListContractors(filters: Filters) {
   const rows = loadDemoData()
     .contractors
     .filter((contractor) => matchesText(contractor.name, filters.q))
@@ -680,12 +680,12 @@ export async function demoListContractors(filters: Filters) {
     }))
     .sort((a, b) => (a.name ?? "").localeCompare(b.name ?? ""));
 
-  return paginate(rows, filters);
+  return Promise.resolve(paginate(rows, filters));
 }
 
-export async function demoGetContractor(id: string) {
+export function demoGetContractor(id: string) {
   const contractor = contractorById(id);
-  if (!contractor) return null;
+  if (!contractor) return Promise.resolve(null);
   const projects = loadDemoData().properties.flatMap((property) =>
     property.permits
       .filter((permit) => permit.contractor === contractor.id)
@@ -704,7 +704,7 @@ export async function demoGetContractor(id: string) {
       }))
   );
 
-  return {
+  return Promise.resolve({
     company_id: contractor.id,
     business_reputation_profile_id: contractor.id,
     name: contractor.name,
@@ -751,10 +751,10 @@ export async function demoGetContractor(id: string) {
       city: project.city,
       relationship: "worked_on",
     })),
-  };
+  });
 }
 
-export async function demoRunInquiry(key: string, filters: Filters): Promise<InquiryResult> {
+export function demoRunInquiry(key: string, filters: Filters): Promise<InquiryResult> {
   const data = loadDemoData();
   const rows: InquiryRow[] = (() => {
     switch (key) {
@@ -950,7 +950,7 @@ export async function demoRunInquiry(key: string, filters: Filters): Promise<Inq
             address: property.address,
             city: property.city,
             active_permits: property.permits.filter(permitIsOpen).length,
-            turnover_signal: data.turnover[property.id],
+            turnover_signal: data.turnover[property.id] ?? null,
             source_url: firstSourceUrl(property.src),
           }));
       case "neighborhoods-increasing-permits":
@@ -1016,7 +1016,7 @@ export async function demoRunInquiry(key: string, filters: Filters): Promise<Inq
     }
   })();
 
-  return takePaged(rows, filters);
+  return Promise.resolve(takePaged(rows, filters));
 }
 
 function routeDemoQuestion(question: string): string {

@@ -12,12 +12,15 @@ describe("demo app readiness", () => {
   });
 
   test("primary navigation uses the real demo view names", () => {
-    const navSource = readFileSync("apps/web/components/app/site-nav.tsx", "utf8");
+    const navSource = readFileSync("packages/shared/src/workbench-copy.ts", "utf8");
 
+    expect(navSource).toContain('label: "Workspace"');
     expect(navSource).toContain('label: "Properties"');
-    expect(navSource).toContain('label: "Tenants"');
+    expect(navSource).toContain('label: "Tenancy"');
     expect(navSource).toContain('label: "Businesses"');
     expect(navSource).toContain('label: "Contractors"');
+    expect(navSource).toContain('label: "Inquiries"');
+    expect(navSource).not.toContain('label: "Insights"');
     expect(navSource).not.toContain('label: "Parcels"');
   });
 
